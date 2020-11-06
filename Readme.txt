@@ -5,4 +5,6 @@ To run the program
 or use the following command line
 
 g++ *.cpp -o output
+then
+./output
 
