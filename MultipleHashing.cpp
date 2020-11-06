@@ -29,14 +29,14 @@ int modHashFunc(int key){
 }
 //
 int insertItem_multipleHashing(int fd,DataItem item){
-    //int result = pwrite(fd,&item,sizeof(DataItem), Offset);
+    
 	//Definitions
 	struct DataItem data;   //a variable to read in it the records from the db
 	int count = 0;				//No of accessed records
 	int rewind = 0;			//A flag to start searching from the first bucket
 	int hashIndex = modHashFunc(item.key);  				//calculate the Bucket index
 	int Offset = hashIndex*sizeof(Bucket);		//calculate the starting address of the bucket
-	//int Offset = startingOffset;						//Offset variable which we will use to iterate on the db
+	
     ssize_t result = 0;
     //Check Bucket from first hash
     for (int i = 0; i < RECORDSPERBUCKET; i++)
@@ -125,7 +125,7 @@ int searchItem_multipleHashing(int fd,struct DataItem* item,int *count)
 	int rewind = 0;			//A flag to start searching from the first bucket
 	int hashIndex = modHashFunc(item->key);  				//calculate the Bucket index
 	int Offset = hashIndex*sizeof(Bucket);		//calculate the starting address of the bucket
-	//int Offset = startingOffset;						//Offset variable which we will use to iterate on the db
+	
 
     ssize_t result = 0;
     //check bucket from first hash
@@ -170,9 +170,9 @@ int searchItem_multipleHashing(int fd,struct DataItem* item,int *count)
 
 	//Main Loop
 	MultiHashSearch:
-	//on the linux terminal use man pread to check the function manual
+	
 	result = pread(fd,&data,sizeof(DataItem), Offset);
-	//one record accessed
+
 	(*count)++;
 	//check whether it is a valid record or not
     if(result <= 0) //either an error happened in the pread or it hit an unallocated space
@@ -193,7 +193,7 @@ int searchItem_multipleHashing(int fd,struct DataItem* item,int *count)
     				goto MultiHashSearch;
     	     } else
     	    	  if(rewind == 1 && Offset >= startingOffset) {
-    				return -1; //no empty spaces
+    				return -1; //File not found
     	     }
     		goto MultiHashSearch;
     }
