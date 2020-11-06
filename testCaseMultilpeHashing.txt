@@ -1,0 +1,7 @@
+insert(11, 70);  
+insert(31, 80);
+insert(21, 25);
+insert(71, 44);
+insert(55, 25);
+insert(45, 44);
+insert(191, 25);
