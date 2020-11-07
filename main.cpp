@@ -1,11 +1,10 @@
 //============================================================================
 // Name        : hashskeleton.cpp
-// Author      : 
+// Author      :
 // Version     :
 // Copyright   : Code adapted From https://www.tutorialspoint.com/
 // Description : Hashing using open addressing
 //============================================================================
-
 
 #include "readfile.h"
 /*
@@ -14,12 +13,25 @@
 #include "openAddressing.cpp"
 */
 
-void insert(int key,int data);
-int deleteItem(int key);
-struct DataItem * search(int key);
+#define OPENADDRESSING 1
+#define CHAINING 2
+#define MULTIHASHING 3
+#define TESTCASE1 1
+#define TESTCASE2 2
 
+int insert(int key, int data, int type);
+int deleteItem(int key, int type);
+struct DataItem *search(int key, int type);
+int filehandle; //handler for the database file
 
-int filehandle;   //handler for the database file
+// function to test  Addressing hashing
+void testOpenAdd(int testCaseNum);
+
+// function to test  Multiple hashing
+void testMulHashing(int testCaseNum);
+
+// function to test chaining hashing
+void testChaining(int testCaseNum);
 
 /* DBMS (DataBase Management System) needs to store its data in something non-volatile
  * so it stores its data into files (manteqy :)).
@@ -46,55 +58,233 @@ int filehandle;   //handler for the database file
 
 */
 
-int main(){
+int main()
+{
 
-//here we create a sample test to read and write to our database file
+   int type;
 
-  //1. Create Database file or Open it if it already exists, check readfile.cpp
-   filehandle = createFile(FILESIZE,"openaddressing");
-  //2. Display the database file, check openAddressing.cpp
-   //DisplayFile(filehandle);
+   do
+   {
+      printf("Choose a Hashing Function\n\n");
+      printf("1. Open Addressing\n");
+      printf("2. Chaining\n");
+      printf("3. MultipleHashing\n");
+      printf("4. Exit\n");
+      scanf("%d", &type);
 
-  
-  //3. Add some data in the table   
-   insert(1, 20);
-   insert(2, 70);
-   insert(42, 80);
-   insert(4, 25);
-   insert(12, 44);
-   insert(14, 32);
-   insert(17, 11);
-   insert(13, 78);
-   insert(37, 97);
-   insert(11, 34);
-   insert(22, 730);
-   insert(46, 840);
-   insert(9, 83);
-   insert(21, 424);
-   insert(41, 115);
-   insert(71, 47);
-   insert(31, 92);
-   insert(73, 45);
-   
-   //insert(9,30);
+      switch (type)
+      {
+      case 1:
+         printf("Choose TestCase1 or TestCase2 :\n");
+         scanf("%d", &type);
+         testOpenAdd(type);
+         break;
+      case 2:
+         printf("Choose TestCase1 or TestCase2 :\n");
+         scanf("%d", &type);
+         testChaining(type);
+         break;
 
-   //4. Display the database file again
-   DisplayFile(filehandle);
+      case 3:
+         printf("Choose TestCase1 or TestCase2 :\n");
+         scanf("%d", &type);
+         testMulHashing(type);
+         break;
+      case 4:
+         printf("Goodbye\n");
+         break;
+      default:
+         printf("Wrong Choice. Enter again\n");
+         break;
+      }
 
-   //5. Search the database
-   search(21);
+   } while (type != 4);
+   // int c;
 
-   //6. delete an item from the database
-   deleteItem(21);
-   //insert(66,69);
-   //7. Display the final data base
-   DisplayFile(filehandle);
-   // And Finally don't forget to close the file.
-   close(filehandle);
+   // printf( "Enter a value :");
+   // c = getchar( );
+
+   // printf( "\nYou entered: ");
+   // putchar( c );
+
+   //testOpenAdd(TESTCASE2);
+
+   //testMulHashing(TESTCASE2);
+
    return 0;
+}
 
+void testOpenAdd(int testCaseNum)
+{
 
+   // create file
+   filehandle = createFile(FILESIZE, "openaddressing");
 
+   int totalRecoreds = 0;
+
+   if (testCaseNum == TESTCASE1)
+   {
+      // insert 20 record inside the file
+      for (int i = 0; i < 20; i++)
+      {
+         totalRecoreds += insert(i + 1, i + 1, OPENADDRESSING);
+      }
+   }
+   else
+   {
+      // insert 20 record inside the file
+      for (int i = 0; i < 20; i++)
+      {
+         totalRecoreds += insert(i * 10, i + 1, OPENADDRESSING);
+      }
+   }
+
+   printf("------------------------------------------------------------------------------\n");
+   printf("Total Numbers of records searched to complete file is %d \n  ", totalRecoreds);
+   printf("------------------------------------------------------------------------------\n");
+
+   DisplayFile(filehandle);
+
+   printf("------------------------------------------------------------------------------\n");
+
+   search(10, OPENADDRESSING); // search for key 6
+
+   printf("------------------------------------------------------------------------------\n");
+
+   deleteItem(10, OPENADDRESSING); // then delete the record
+
+   printf("------------------------------------------------------------------------------\n");
+
+   insert(26, 26, OPENADDRESSING); // insert in the deleted record place
+
+   printf("------------------------------------------------------------------------------\n");
+
+   DisplayFile(filehandle);
+
+   printf("------------------------------------------------------------------------------\n");
+
+   insert(30, 30, OPENADDRESSING); // try to insert extra record in the full file
+
+   close(filehandle);
+
+   remove("openaddressing");
+}
+
+void testChaining(int testCaseNum)
+{
+   // create file
+   printf("FILESIZECHAINING %d", FILESIZECHAINING);
+   filehandle = createFile(FILESIZECHAINING, "chaining");
+
+   int totalRecoreds = 0;
+
+   if (testCaseNum == TESTCASE1)
+   {
+      // insert 20 record inside the file
+      for (int i = 0; i < 20; i++)
+      {
+         totalRecoreds += insert(i + 1, i + 1, CHAINING);
+      }
+   }
+   else
+   {
+      // insert 40 record inside the file
+      for (int i = 0; i < 40; i++)
+      {
+         totalRecoreds += insert(i, i + 1, CHAINING);
+      }
+   }
+
+   printf("------------------------------------------------------------------------------\n");
+   printf("Total Numbers of records searched to complete file is %d \n  ", totalRecoreds);
+   printf("------------------------------------------------------------------------------\n");
+
+   DisplayFileChaining(filehandle);
+
+   printf("------------------------------------------------------------------------------\n");
+
+   search(10, CHAINING); // search for key 6
+
+   printf("------------------------------------------------------------------------------\n");
+
+   deleteItem(10, CHAINING); // then delete the record
+
+   printf("------------------------------------------------------------------------------\n");
+
+   insert(26, 26, CHAINING); // insert in the deleted record place
+
+   printf("------------------------------------------------------------------------------\n");
+
+   DisplayFileChaining(filehandle);
+
+   printf("------------------------------------------------------------------------------\n");
+
+   insert(30, 30, CHAINING);
+
+   printf("------------------------------------------------------------------------------\n");
+
+   DisplayFileChaining(filehandle);
+
+   printf("------------------------------------------------------------------------------\n");
+
+   close(filehandle);
+
+   remove("chaining");
+}
+
+void testMulHashing(int testCaseNum)
+{
+   // create file
+   filehandle = createFile(FILESIZE, "multihashing");
+
+   int totalRecoreds = 0;
+
+   if (testCaseNum == TESTCASE1)
+   {
+      // insert 20 record inside the file
+      for (int i = 0; i < 20; i++)
+      {
+         totalRecoreds += insert(i + 1, i + 1, MULTIHASHING);
+      }
+   }
+   else
+   {
+      // insert 20 record inside the file
+      for (int i = 0; i < 20; i++)
+      {
+         totalRecoreds += insert(i * 10, i + 1, MULTIHASHING);
+      }
+   }
+
+   printf("------------------------------------------------------------------------------\n");
+   printf("Total Numbers of records searched to complete file is %d \n  ", totalRecoreds);
+   printf("------------------------------------------------------------------------------\n");
+
+   DisplayFile(filehandle);
+
+   printf("------------------------------------------------------------------------------\n");
+
+   search(10, MULTIHASHING); // search for key 6
+
+   printf("------------------------------------------------------------------------------\n");
+
+   deleteItem(10, MULTIHASHING); // then delete the record
+
+   printf("------------------------------------------------------------------------------\n");
+
+   insert(26, 26, MULTIHASHING); // insert in the deleted record place
+
+   printf("------------------------------------------------------------------------------\n");
+
+   DisplayFile(filehandle);
+
+   printf("------------------------------------------------------------------------------\n");
+
+   insert(30, 30, MULTIHASHING); // try to insert extra record in the full file
+
+   close(filehandle);
+
+   remove("multihashing");
 }
 
 /* functionality: insert the (key,data) pair into the database table
@@ -102,13 +292,43 @@ int main(){
     Input: key, data
     Output: print statement with the no. of comparisons
 */
-void insert(int key,int data){
-     struct DataItem item ;
-     item.data = data;
-     item.key = key;
-     item.valid = 1;
-     int result= insertItem(filehandle,item);  //TODO: implement this function in openAddressing.cpp
-     printf("Insert: No. of searched records:%d\n",abs(result));
+int insert(int key, int data, int type)
+{
+   struct DataItem item;
+   item.data = data;
+   item.key = key;
+   item.valid = 1;
+
+   int result = 0;
+
+   if (type == OPENADDRESSING)
+   {
+      result = insertItem(filehandle, item);
+   }
+
+   if (type == CHAINING)
+   {
+      result = insertItem_chaining(filehandle, item);
+   }
+
+   if (type == MULTIHASHING)
+   {
+      result = insertItem_multipleHashing(filehandle, item);
+   }
+
+   if (result == -2)
+   {
+      printf("Insert: No empty Space found in the file \n");
+   }
+   else if (result == -1)
+   {
+      printf("Insert: Error happened\n");
+   }
+   else
+   {
+      printf("Insert: No. of searched records:%d\n", abs(result));
+   }
+   return result;
 }
 
 /* Functionality: search for a data in the table using the key
@@ -116,18 +336,35 @@ void insert(int key,int data){
    Input:  key
    Output: the return data Item
 */
-struct DataItem * search(int key)
+struct DataItem *search(int key, int type)
 {
-  struct DataItem* item = (struct DataItem *) malloc(sizeof(struct DataItem));
-     item->key = key;
-     int diff = 0;
-     int Offset= searchItem(filehandle,item,&diff); //this function is implemented for you in openAddressing.cpp
-     printf("Search: No of records searched is %d\n",diff);
-     if(Offset <0)  //If offset is negative then the key doesn't exists in the table
-       printf("Item not found\n");
-     else
-        printf("Item found at Offset: %d,  Data: %d and key: %d\n",Offset,item->data,item->key);
-  return item;
+   struct DataItem *item = (struct DataItem *)malloc(sizeof(struct DataItem));
+   item->key = key;
+   int diff = 0;
+
+   int Offset;
+
+   if (type == OPENADDRESSING)
+   {
+      Offset = searchItem(filehandle, item, &diff);
+   }
+
+   if (type == CHAINING)
+   {
+      Offset = searchItem_chaining(filehandle, item, &diff);
+   }
+
+   if (type == MULTIHASHING)
+   {
+      Offset = searchItem_multipleHashing(filehandle, item, &diff);
+   }
+
+   printf("Search: No of records searched is %d\n", diff);
+   if (Offset < 0) //If offset is negative then the key doesn't exists in the table
+      printf("Item not found\n");
+   else
+      printf("Item found at Offset: %d,  Data: %d and key: %d\n", Offset, item->data, item->key);
+   return item;
 }
 
 /* Functionality: delete a record with a certain key
@@ -135,15 +372,31 @@ struct DataItem * search(int key)
    Input:  key
    Output: return 1 on success and -1 on failure
 */
-int deleteItem(int key){
-   struct DataItem* item = (struct DataItem *) malloc(sizeof(struct DataItem));
+int deleteItem(int key, int type)
+{
+   struct DataItem *item = (struct DataItem *)malloc(sizeof(struct DataItem));
    item->key = key;
    int diff = 0;
-   int Offset= searchItem(filehandle,item,&diff);
-   printf("Delete: No of records searched is %d\n",diff);
-   if(Offset >=0 )
+
+   int Offset;
+   if (type == OPENADDRESSING)
    {
-    return deleteOffset(filehandle,Offset);
+      Offset = searchItem(filehandle, item, &diff);
+   }
+
+   if (type == CHAINING)
+   {
+      Offset = searchItem_chaining(filehandle, item, &diff);
+   }
+
+   if (type == MULTIHASHING)
+   {
+      Offset = searchItem_multipleHashing(filehandle, item, &diff);
+   }
+   printf("Delete: No of records searched is %d\n", diff);
+   if (Offset >= 0)
+   {
+      return deleteOffset(filehandle, Offset);
    }
    return -1;
 }
