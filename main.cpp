@@ -6,7 +6,13 @@
 // Description : Hashing using open addressing
 //============================================================================
 
+
 #include "readfile.h"
+/*
+#include "readfile.cpp"
+#include "chaining.cpp"
+#include "openAddressing.cpp"
+*/
 
 void insert(int key,int data);
 int deleteItem(int key);
