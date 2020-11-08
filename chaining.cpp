@@ -142,7 +142,7 @@ int searchItem_chaining(int fd,struct DataItem* item,int *count, bool del)
 	    {
             //I found the needed record
             item->data = data.data;
-            if(del){
+            if(del && data.nextOffset == -1){
                 prevData.nextOffset = -1;
                 ssize_t result_w = pwrite(fd,&prevData,sizeof(DataItem), prevOffset);
                 if(result_w < sizeof(DataItem)){
