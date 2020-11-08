@@ -351,7 +351,7 @@ struct DataItem *search(int key, int type)
 
    if (type == CHAINING)
    {
-      Offset = searchItem_chaining(filehandle, item, &diff);
+      Offset = searchItem_chaining(filehandle, item, &diff, false);
    }
 
    if (type == MULTIHASHING)
@@ -386,7 +386,7 @@ int deleteItem(int key, int type)
 
    if (type == CHAINING)
    {
-      Offset = searchItem_chaining(filehandle, item, &diff);
+      Offset = searchItem_chaining(filehandle, item, &diff, true);
    }
 
    if (type == MULTIHASHING)

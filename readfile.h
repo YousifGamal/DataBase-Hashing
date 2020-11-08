@@ -19,8 +19,8 @@
 #define RECORDSPERBUCKET 2                                                                     //No. of records inside each Bucket
 #define BUCKETSIZE sizeof(Bucket)                                                              //Size of the bucket (in bytes)
 #define FILESIZE BUCKETSIZE *MBUCKETS                                                          //+ OVERFLOWLISTSIZE*sizeof(DataItem)*MBUCKETS // size of file
-#define FILESIZECHAINING BUCKETSIZE *MBUCKETS + OVERFLOWLISTSIZE * sizeof(DataItem) * MBUCKETS // size of file
-#define OVERFLOWLISTSIZE 2                                                                     //Size of a bucket overflow list
+#define FILESIZECHAINING BUCKETSIZE *MBUCKETS + OVERFLOWLISTSIZE * sizeof(DataItem)  // size of file
+#define OVERFLOWLISTSIZE 10                                                                     //Size of a bucket overflow list
 
 //Data Record inside the file
 struct DataItem
@@ -54,6 +54,6 @@ int searchItem_multipleHashing(int filehandle, struct DataItem *item, int *count
 
 //Check the chaining.cpp
 int insertItem_chaining(int fd, DataItem item);
-int searchItem_chaining(int filehandle, struct DataItem *item, int *count);
+int searchItem_chaining(int filehandle, struct DataItem *item, int *count, bool del);
 
 #endif /* READFILE_H_ */
