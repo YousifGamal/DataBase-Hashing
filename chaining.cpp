@@ -10,9 +10,21 @@ int modeHashCode(int key){
 
 
 int insertItem_chaining(int fd,DataItem item){
+    int diff = 0;
+    struct DataItem seacrhData;
+    seacrhData.key = item.key;
+    int Offset = searchItem_chaining(fd, &seacrhData, &diff, false); // search for this key as it may already exist
+    if(Offset > 0){
+        item.nextOffset = seacrhData.nextOffset;
+        int result_w = pwrite(fd,&item,sizeof(DataItem), Offset);
+        if(result_w < sizeof(DataItem)){
+            perror("some error occurred in pwrite while inserting.");
+        }
+        return diff;
+    }
     int hashIndex = modeHashCode(item.key);  				//calculate the Bucket index
     int startingOffset = hashIndex*sizeof(Bucket);		//calculate the starting address of the bucket
-	int Offset = startingOffset;						//Offset variable which we will use to iterate on the db
+	Offset = startingOffset;						//Offset variable which we will use to iterate on the db
     struct DataItem data;   //a variable to read in it the records from the db
     struct DataItem prevData; //to hold data of current record
     int prevOffset;
@@ -39,7 +51,7 @@ int insertItem_chaining(int fd,DataItem item){
     bool isEmpty = true;
     Offset = modeHashCode(MBUCKETS - 1) * BUCKETSIZE +  BUCKETSIZE;
     while(true){ //loop to reach the end of the chain
-        if(nextOffset == -1) break;
+        if(nextOffset == NULL) break;
         isEmpty = false;
         ssize_t result_r = pread(fd,&data,sizeof(DataItem), nextOffset);
         prevData = data;
@@ -127,23 +139,25 @@ int searchItem_chaining(int fd,struct DataItem* item,int *count, bool del)
         }
         else if (data.valid == 1 && data.key == item->key) {
             //I found the needed record
-                    item->data = data.data ;
-                    return Offset;
+                item->data = data.data ;
+                item->nextOffset = data.nextOffset;
+                return Offset;
         }
         Offset +=sizeof(DataItem);
     }
     prevData = data;
     int nextOffset = data.nextOffset;
     while(true){ //loop to reach the needed record of the chain
-        if(nextOffset == -1) break;
+        if(nextOffset == NULL) break;
         ssize_t result_r = pread(fd,&data,sizeof(DataItem), nextOffset);
         (*count)++;
         if (data.valid == 1 && data.key == item->key)
 	    {
             //I found the needed record
             item->data = data.data;
-            if(del && data.nextOffset == -1){
-                prevData.nextOffset = -1;
+            item->nextOffset = data.nextOffset;
+            if(del && data.nextOffset == NULL){
+                prevData.nextOffset = NULL;
                 ssize_t result_w = pwrite(fd,&prevData,sizeof(DataItem), prevOffset);
                 if(result_w < sizeof(DataItem)){
                     perror("some error occurred in pwrite while inserting.");
@@ -159,6 +173,9 @@ int searchItem_chaining(int fd,struct DataItem* item,int *count, bool del)
     return -1;
 }
 
+
+
+
 int deleteOffsetChaining(int fd, int Offset)
 {
 	struct DataItem dummyItem;
@@ -169,7 +186,7 @@ int deleteOffsetChaining(int fd, int Offset)
     ssize_t result_w;
     ssize_t result = pread(fd,&data,sizeof(DataItem), Offset); //one record accessed
     int nextOffset = data.nextOffset;
-    if(nextOffset != -1){
+    if(nextOffset != NULL){
         result = pread(fd,&data,sizeof(DataItem), nextOffset);
         result_w = pwrite(fd,&data,sizeof(DataItem), Offset);
         if(result_w < sizeof(DataItem)){
@@ -188,4 +205,92 @@ int deleteOffsetChaining(int fd, int Offset)
 	return result_w;
 }
 
+int deleteChaining(int fd, int Offset, int key)
+{
+    struct DataItem data;
+    struct DataItem data2;
+    struct DataItem dummyItem;
+    dummyItem.valid = 0;
+	dummyItem.key = -1;
+	dummyItem.data = 0;
+    int hashIndex = modeHashCode(key);  				//calculate the Bucket index
+	int startingOffset = hashIndex*sizeof(Bucket);		//calculate the starting address of the bucket
+    int endingOffset = startingOffset + (RECORDSPERBUCKET-1) * sizeof(DataItem); //calculate the address of record before the last one
+    if(Offset >= startingOffset && Offset < endingOffset){
+        ssize_t result_r = pread(fd,&data,sizeof(DataItem), endingOffset); //read last record
+        if(data.nextOffset != -1){
+            result_r = pread(fd,&data2,sizeof(DataItem), data.nextOffset);
+            ssize_t result_w = pwrite(fd,&dummyItem,sizeof(DataItem), data.nextOffset);
+            if(result_w < sizeof(DataItem)){
+                perror("some error occurred in pwrite while inserting.");
+            }
+            data.nextOffset = data2.nextOffset;
+            data2.nextOffset = NULL;
+            result_w = pwrite(fd,&data,sizeof(DataItem), endingOffset);
+            if(result_w < sizeof(DataItem)){
+                perror("some error occurred in pwrite while inserting.");
+            }
+            result_w = pwrite(fd,&data2,sizeof(DataItem), Offset);
+            if(result_w < sizeof(DataItem)){
+                perror("some error occurred in pwrite while inserting.");
+            }
+            return result_w;
+        }
+    }
+    return deleteOffsetChaining(fd, Offset);
+}
 
+
+/* Functionality: Display all the file contents
+ *
+ * Input:  fd: filehandler which contains the db
+ *
+ * Output: no. of non-empty records
+ */
+int DisplayFileChaining(int fd)
+{
+
+	struct DataItem data;
+	int count = 0;
+	int Offset = 0;
+	for (Offset = 0; Offset < FILESIZE; Offset += sizeof(DataItem))
+	{
+		ssize_t result = pread(fd, &data, sizeof(DataItem), Offset);
+		if (result < 0)
+		{
+			perror("some error occurred in pread");
+			return -1;
+		}
+		else if (result == 0 || data.valid == 0)
+		{ //empty space found or end of file
+			printf("Bucket: %d, Offset %d:~\n", Offset / BUCKETSIZE, Offset);
+		}
+		else
+		{
+			pread(fd, &data, sizeof(DataItem), Offset);
+			printf("Bucket: %d, Offset: %d, Data: %d, key: %d\n", Offset / BUCKETSIZE, Offset, data.data, data.key);
+			count++;
+		}
+	}
+
+	printf("Overflow List --------------------\n");
+	for(Offset = FILESIZE; Offset<FILESIZECHAINING; Offset+=sizeof(DataItem)){
+		ssize_t result = pread(fd, &data, sizeof(DataItem), Offset);
+		if (result < 0)
+		{
+			perror("some error occurred in pread");
+			return -1;
+		}
+		else if (result == 0 || data.valid == 0)
+		{ //empty space found or end of file
+			printf("Offset %d:~\n", Offset);
+		}
+		else
+		{
+			pread(fd, &data, sizeof(DataItem), Offset);
+			printf("Offset: %d, Data: %d, key: %d\n", Offset, data.data, data.key);
+			count++;
+		}	
+	}
+	return count;
+}

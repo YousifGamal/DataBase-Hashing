@@ -20,7 +20,8 @@
 #define BUCKETSIZE sizeof(Bucket)                                                              //Size of the bucket (in bytes)
 #define FILESIZE BUCKETSIZE *MBUCKETS                                                          //+ OVERFLOWLISTSIZE*sizeof(DataItem)*MBUCKETS // size of file
 #define FILESIZECHAINING BUCKETSIZE *MBUCKETS + OVERFLOWLISTSIZE * sizeof(DataItem)  // size of file
-#define OVERFLOWLISTSIZE 10                                                                     //Size of a bucket overflow list
+#define OVERFLOWLISTSIZE 10   //Size of a bucket overflow list
+#define NULL 0   // predefined null;                                                            
 
 //Data Record inside the file
 struct DataItem
@@ -28,7 +29,7 @@ struct DataItem
    int valid; //) means invalid record, 1 = valid record
    int data;
    int key;
-   int nextOffset = -1;
+   int nextOffset = NULL;
 };
 
 //Each bucket contains number of records

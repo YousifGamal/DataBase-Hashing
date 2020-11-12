@@ -169,33 +169,6 @@ int DisplayFile(int fd)
 	return count;
 }
 
-int DisplayFileChaining(int fd)
-{
-
-	struct DataItem data;
-	int count = 0;
-	int Offset = 0;
-	for (Offset = 0; Offset < FILESIZECHAINING; Offset += sizeof(DataItem))
-	{
-		ssize_t result = pread(fd, &data, sizeof(DataItem), Offset);
-		if (result < 0)
-		{
-			perror("some error occurred in pread");
-			return -1;
-		}
-		else if (result == 0 || data.valid == 0)
-		{ //empty space found or end of file
-			printf("Bucket: %d, Offset %d:~\n", Offset / BUCKETSIZE, Offset);
-		}
-		else
-		{
-			pread(fd, &data, sizeof(DataItem), Offset);
-			printf("Bucket: %d, Offset: %d, Data: %d, key: %d\n", Offset / BUCKETSIZE, Offset, data.data, data.key);
-			count++;
-		}
-	}
-	return count;
-}
 
 /* Functionality: Delete item at certain offset
  *

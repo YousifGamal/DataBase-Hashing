@@ -394,6 +394,11 @@ int deleteItem(int key, int type)
       Offset = searchItem_multipleHashing(filehandle, item, &diff);
    }
    printf("Delete: No of records searched is %d\n", diff);
+
+   if(Offset >= 0 && type == CHAINING){
+      return deleteChaining(filehandle, Offset, key);
+   }
+
    if (Offset >= 0)
    {
       return deleteOffset(filehandle, Offset);
