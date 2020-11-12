@@ -56,5 +56,8 @@ int searchItem_multipleHashing(int filehandle, struct DataItem *item, int *count
 //Check the chaining.cpp
 int insertItem_chaining(int fd, DataItem item);
 int searchItem_chaining(int filehandle, struct DataItem *item, int *count, bool del);
+int deleteChaining(int fd, int Offset, int key);
+int deleteOffsetChaining(int fd, int Offset);
+int DisplayFileChaining(int fd);
 
 #endif /* READFILE_H_ */
