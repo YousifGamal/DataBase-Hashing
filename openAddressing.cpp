@@ -34,7 +34,22 @@ int hashCode(int key)
 int insertItem(int fd, DataItem item)
 {
 
-	//int result = pwrite(fd,&item,sizeof(DataItem), Offset);
+	// for checking for similar keys before the insertion
+	struct DataItem *tempItem = (struct DataItem *)malloc(sizeof(struct DataItem));
+	*tempItem = item;
+	int diff = 0;
+
+	int OffsetTemp;
+
+	OffsetTemp = searchItem(fd, tempItem, &diff);
+	// printf("-----------------Bucket Temp: offsettemp:%d  Data: %d, key: %d\n", OffsetTemp, tempItem->data, tempItem->key);
+	if (OffsetTemp >= 0)
+	{
+		return -3;
+	}
+
+	///////////////
+
 	//Definitions
 	struct DataItem data;							 //a variable to read in it the records from the db
 	int count = 0;									 //No of accessed records
@@ -168,7 +183,6 @@ int DisplayFile(int fd)
 	}
 	return count;
 }
-
 
 /* Functionality: Delete item at certain offset
  *

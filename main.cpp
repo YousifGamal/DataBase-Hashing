@@ -65,7 +65,7 @@ int main()
 
    do
    {
-      printf("Choose a Hashing Function\n\n");
+      printf("\n\nChoose a Hashing Function\n\n");
       printf("1. Open Addressing\n");
       printf("2. Chaining\n");
       printf("3. MultipleHashing\n");
@@ -99,17 +99,6 @@ int main()
       }
 
    } while (type != 4);
-   // int c;
-
-   // printf( "Enter a value :");
-   // c = getchar( );
-
-   // printf( "\nYou entered: ");
-   // putchar( c );
-
-   //testOpenAdd(TESTCASE2);
-
-   //testMulHashing(TESTCASE2);
 
    return 0;
 }
@@ -163,7 +152,7 @@ void testOpenAdd(int testCaseNum)
 
    printf("------------------------------------------------------------------------------\n");
 
-   insert(30, 30, OPENADDRESSING); // try to insert extra record in the full file
+   insert(31, 31, OPENADDRESSING); // try to insert extra record in the full file
 
    close(filehandle);
 
@@ -328,6 +317,10 @@ int insert(int key, int data, int type)
    else if (result == -1)
    {
       printf("Insert key = %d: Error happened\n", key);
+   }
+   else if (result == -3)
+   {
+      printf("A record with the same key already exists : key = %d\n", key);
    }
    else
    {
