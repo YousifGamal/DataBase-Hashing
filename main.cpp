@@ -173,27 +173,28 @@ void testOpenAdd(int testCaseNum)
 void testChaining(int testCaseNum)
 {
    // create file
-   printf("FILESIZECHAINING %d", FILESIZECHAINING);
    filehandle = createFile(FILESIZECHAINING, "chaining");
 
    int totalRecoreds = 0;
 
    if (testCaseNum == TESTCASE1)
    {
-      // insert 20 record inside the file
-      for (int i = 0; i < 20; i++)
+      // insert 30 record inside the file
+      for (int i = 0; i < 30; i++)
       {
          totalRecoreds += insert(i + 1, i + 1, CHAINING);
       }
    }
    else
    {
-      // insert 40 record inside the file
-      for (int i = 0; i < 40; i++)
+      // insert 30 record inside the file
+      for (int i = 0; i < 30; i++)
       {
-         totalRecoreds += insert(i, i + 1, CHAINING);
+         totalRecoreds += insert(i + 1, i + 1, CHAINING);
       }
    }
+
+   int num = (testCaseNum == TESTCASE1) ? 26 : 6;
 
    printf("------------------------------------------------------------------------------\n");
    printf("Total Numbers of records searched to complete file is %d \n  ", totalRecoreds);
@@ -203,15 +204,11 @@ void testChaining(int testCaseNum)
 
    printf("------------------------------------------------------------------------------\n");
 
-   search(10, CHAINING); // search for key 6
+   search(num, CHAINING); // search for key 6
 
    printf("------------------------------------------------------------------------------\n");
 
-   deleteItem(10, CHAINING); // then delete the record
-
-   printf("------------------------------------------------------------------------------\n");
-
-   insert(26, 26, CHAINING); // insert in the deleted record place
+   deleteItem(num, CHAINING); // then delete the record
 
    printf("------------------------------------------------------------------------------\n");
 
@@ -219,7 +216,15 @@ void testChaining(int testCaseNum)
 
    printf("------------------------------------------------------------------------------\n");
 
-   insert(30, 30, CHAINING);
+   insert(num, num, CHAINING); // insert in the deleted record place
+
+   printf("------------------------------------------------------------------------------\n");
+
+   DisplayFileChaining(filehandle);
+
+   printf("------------------------------------------------------------------------------\n");
+
+   insert(1000, 1000, CHAINING);
 
    printf("------------------------------------------------------------------------------\n");
 
@@ -318,15 +323,15 @@ int insert(int key, int data, int type)
 
    if (result == -2)
    {
-      printf("Insert: No empty Space found in the file \n");
+      printf("Insert key = %d: No empty Space found in the file \n", key);
    }
    else if (result == -1)
    {
-      printf("Insert: Error happened\n");
+      printf("Insert key = %d: Error happened\n", key);
    }
    else
    {
-      printf("Insert: No. of searched records:%d\n", abs(result));
+      printf("Insert key = %d: No. of searched records:%d\n", key, abs(result));
    }
    return result;
 }
@@ -359,7 +364,7 @@ struct DataItem *search(int key, int type)
       Offset = searchItem_multipleHashing(filehandle, item, &diff);
    }
 
-   printf("Search: No of records searched is %d\n", diff);
+   printf("Search for key = %d: No of records searched is %d\n", key, diff);
    if (Offset < 0) //If offset is negative then the key doesn't exists in the table
       printf("Item not found\n");
    else
@@ -393,9 +398,10 @@ int deleteItem(int key, int type)
    {
       Offset = searchItem_multipleHashing(filehandle, item, &diff);
    }
-   printf("Delete: No of records searched is %d\n", diff);
+   printf("Delete key = %d: No of records searched is %d\n", key, diff);
 
-   if(Offset >= 0 && type == CHAINING){
+   if (Offset >= 0 && type == CHAINING)
+   {
       return deleteChaining(filehandle, Offset, key);
    }
 
