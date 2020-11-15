@@ -158,6 +158,7 @@ int searchItem_chaining(int fd, struct DataItem *item, int *count, bool del)
             item->nextOffset = data.nextOffset;
             return Offset;
         }
+        prevOffset = Offset;
         Offset += sizeof(DataItem);
     }
     prevData = data;
